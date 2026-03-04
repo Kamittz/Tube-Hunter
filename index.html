@@ -1,3 +1,1010 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TubeHunter Pro - Inteligência Competitiva para YouTube</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .gradient-text { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -10px rgba(102, 126, 234, 0.3); }
+        .glow { box-shadow: 0 0 20px rgba(102, 126, 234, 0.5); }
+        .pricing-card { background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%); }
+        .popular-badge { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .price-tag { background: linear-gradient(135deg, #10b981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+        .savings-badge { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; font-size: 0.65rem; padding: 0.25rem 0.5rem; border-radius: 9999px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .slide-in { animation: slideIn 0.5s ease-out; }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+        .pulse-ring::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.4);
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        .loading-skeleton {
+            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .modal-enter { animation: modalIn 0.3s ease-out; }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="text-slate-200 antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass border-b border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg glow relative pulse-ring">
+                        <svg class="w-6 h-6 text-white relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="text-2xl font-bold tracking-tight text-white">Tube<span class="text-indigo-400">Hunter</span></span>
+                        <span class="text-xs text-slate-400 ml-1 font-medium">PRO</span>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <button onclick="scrollToSection('dashboard')" class="text-slate-300 hover:text-white transition font-medium">Dashboard</button>
+                    <button onclick="scrollToSection('easy-formats')" class="text-slate-300 hover:text-white transition font-medium">Formatos Fáceis</button>
+                    <button onclick="scrollToSection('global')" class="text-slate-300 hover:text-white transition font-medium">Global</button>
+                    <button onclick="scrollToSection('pricing')" class="text-indigo-400 hover:text-indigo-300 transition font-medium">Planos</button>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:flex items-center space-x-2 px-3 py-1 bg-slate-800 rounded-full border border-slate-700">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-xs text-slate-400">Sistema Online</span>
+                    </div>
+                    <button onclick="showLoginModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium transition shadow-lg shadow-indigo-500/30">
+                        Minha Conta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+
+        <!-- Header -->
+        <div id="dashboard" class="mb-8 slide-in">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h1 class="text-4xl font-bold text-white mb-2">Dashboard <span class="text-slate-500">/</span> <span class="text-indigo-400">Visão Geral</span></h1>
+                    <p class="text-slate-400">Monitoramento em tempo real de canais em ascensão</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="simulateDataCollection()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition flex items-center gap-2 shadow-lg shadow-emerald-500/20">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span id="syncText">Sincronizar Dados</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 slide-in">
+            <div class="bg-slate-800/50 rounded-2xl p-6 border border-indigo-500/20 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-indigo-500/20 rounded-xl">
+                        <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-emerald-400 text-sm font-semibold flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                        +12%
+                    </span>
+                </div>
+                <div class="text-3xl font-bold text-white mb-1" id="statChannels">24,847</div>
+                <div class="text-sm text-slate-400">Canais Monitorados</div>
+            </div>
+
+            <div class="bg-slate-800/50 rounded-2xl p-6 border border-purple-500/20 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-purple-500/20 rounded-xl">
+                        <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <span class="text-emerald-400 text-sm font-semibold flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                        +28%
+                    </span>
+                </div>
+                <div class="text-3xl font-bold text-white mb-1" id="statNew">1,432</div>
+                <div class="text-sm text-slate-400">Novos Hoje</div>
+            </div>
+
+            <div class="bg-slate-800/50 rounded-2xl p-6 border border-amber-500/20 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-amber-500/20 rounded-xl">
+                        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <span class="text-slate-400 text-sm font-semibold">Média</span>
+                </div>
+                <div class="text-3xl font-bold text-white mb-1">847K</div>
+                <div class="text-sm text-slate-400">Views/dia (Top 100)</div>
+            </div>
+
+            <div class="bg-slate-800/50 rounded-2xl p-6 border border-rose-500/20 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-rose-500/20 rounded-xl">
+                        <svg class="w-6 h-6 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="text-emerald-400 text-sm font-semibold">Ativo</span>
+                </div>
+                <div class="text-3xl font-bold text-white mb-1">2.3M</div>
+                <div class="text-sm text-slate-400">Canais na Fila</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="glass rounded-2xl p-6 mb-8 border border-slate-700 slide-in">
+            <div class="flex flex-col lg:flex-row gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-1">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Criado nos últimos</label>
+                        <select id="dateFilter" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition">
+                            <option value="7">7 dias</option>
+                            <option value="30" selected>30 dias</option>
+                            <option value="90">90 dias</option>
+                            <option value="180">6 meses</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Visualizações mínimas</label>
+                        <select id="viewsFilter" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition">
+                            <option value="10000">10K+</option>
+                            <option value="50000">50K+</option>
+                            <option value="100000" selected>100K+</option>
+                            <option value="500000">500K+</option>
+                            <option value="1000000">1M+</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Nicho Principal</label>
+                        <select id="nicheFilter" onchange="updateSubniches()" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition">
+                            <option value="all">Todos os Nichos</option>
+                            <option value="tech">Tecnologia</option>
+                            <option value="finance">Finanças</option>
+                            <option value="health">Saúde & Fitness</option>
+                            <option value="gaming">Gaming</option>
+                            <option value="education">Educação</option>
+                            <option value="business">Negócios</option>
+                            <option value="entertainment">Entretenimento</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-2 uppercase tracking-wider">Sub-nicho</label>
+                        <select id="subnicheFilter" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 transition">
+                            <option value="all">Todos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2 items-end">
+                    <button onclick="applyFilters()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition shadow-lg shadow-indigo-500/25 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                        </svg>
+                        Filtrar
+                    </button>
+                    <button onclick="resetFilters()" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2.5 rounded-lg font-medium transition">
+                        Limpar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="flex justify-between items-center mb-6 slide-in">
+            <h2 class="text-xl font-semibold text-white">
+                <span id="resultsCount" class="text-indigo-400">0</span> canais encontrados
+            </h2>
+            <div class="flex gap-2">
+                <button onclick="toggleView('grid')" id="gridBtn" class="p-2 rounded-lg bg-slate-800 text-indigo-400 border border-indigo-500 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                    </svg>
+                </button>
+                <button onclick="toggleView('list')" id="listBtn" class="p-2 rounded-lg bg-slate-800 text-slate-400 border border-slate-700 hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div id="channelsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <!-- Channels injected here -->
+        </div>
+
+        <!-- FORMATOS FÁCEIS SECTION -->
+        <div id="easy-formats" class="mt-20 mb-12 slide-in">
+            <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-7 h-7 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Formatos Simples & Virais
+                        <span class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full text-xs font-bold border border-emerald-500/30">CELULAR + IDEIA</span>
+                    </h2>
+                    <p class="text-slate-400 mt-1">Canais que explodiram com equipamento básico. Você pode replicar <strong>hoje mesmo</strong>.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="filterDifficulty('all')" class="diff-btn active px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium transition" data-diff="all">Todos</button>
+                    <button onclick="filterDifficulty('easy')" class="diff-btn px-4 py-2 rounded-lg bg-slate-700 text-slate-300 hover:text-white text-sm font-medium transition" data-diff="easy">🟢 Super Fácil</button>
+                    <button onclick="filterDifficulty('medium')" class="diff-btn px-4 py-2 rounded-lg bg-slate-700 text-slate-300 hover:text-white text-sm font-medium transition" data-diff="medium">🟡 Fácil</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="easyChannels">
+                <!-- Easy format cards will be injected here -->
+            </div>
+        </div>
+
+        <!-- GLOBAL SECTION -->
+        <div id="global" class="mt-20 mb-12 slide-in">
+            <h2 class="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Tendências Globais
+            </h2>
+            <div class="glass rounded-2xl p-6 border border-slate-700">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-2xl">🇺🇸</span>
+                            <h3 class="font-bold text-white">Estados Unidos</h3>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Nicho em alta:</span>
+                                <span class="text-emerald-400 font-medium">Shorts de Receitas</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Crescimento:</span>
+                                <span class="text-emerald-400 font-medium">+340%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Views médio:</span>
+                                <span class="text-white font-medium">1.2M</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-2xl">🇧🇷</span>
+                            <h3 class="font-bold text-white">Brasil</h3>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Nicho em alta:</span>
+                                <span class="text-emerald-400 font-medium">Resumos de Novelas</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Crescimento:</span>
+                                <span class="text-emerald-400 font-medium">+520%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Views médio:</span>
+                                <span class="text-white font-medium">890K</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="text-2xl">🇮🇳</span>
+                            <h3 class="font-bold text-white">Índia</h3>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Nicho em alta:</span>
+                                <span class="text-emerald-400 font-medium">Tech Unboxing</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Crescimento:</span>
+                                <span class="text-emerald-400 font-medium">+280%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-400">Views médio:</span>
+                                <span class="text-white font-medium">2.1M</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRICING SECTION -->
+        <div id="pricing" class="mt-20 mb-12 slide-in">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-white mb-4">Planos & Preços</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto">Escolha o plano ideal para escalar sua pesquisa de canais. Todos os planos incluem acesso aos dados em tempo real.</p>
+                
+                <!-- Billing Toggle -->
+                <div class="flex items-center justify-center gap-4 mt-6">
+                    <span class="text-slate-400 text-sm">Mensal</span>
+                    <button onclick="toggleBilling()" id="billingToggle" class="w-14 h-7 bg-indigo-600 rounded-full relative transition-colors">
+                        <div id="billingKnob" class="absolute right-1 top-1 w-5 h-5 bg-white rounded-full transition-transform"></div>
+                    </button>
+                    <span class="text-white text-sm font-medium">Anual <span class="savings-badge">Economize 40%</span></span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                <!-- Free Plan -->
+                <div class="pricing-card rounded-2xl p-6 border border-slate-700 card-hover">
+                    <div class="mb-4">
+                        <h3 class="text-xl font-bold text-white">Iniciante</h3>
+                        <p class="text-slate-400 text-sm mt-1">Para quem está começando</p>
+                    </div>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-white">R$0</span>
+                        <span class="text-slate-400">/mês</span>
+                    </div>
+                    <ul class="space-y-3 mb-6 text-sm">
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            50 canais/dia
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Filtros básicos
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            3 nichos
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-500">
+                            <svg class="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            Exportação de dados
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 rounded-lg border border-slate-600 text-white hover:bg-slate-800 transition font-medium">
+                        Começar Grátis
+                    </button>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="pricing-card rounded-2xl p-6 border-2 border-indigo-500 relative card-hover transform scale-105">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="popular-badge px-4 py-1 rounded-full text-sm font-bold shadow-lg">MAIS POPULAR</span>
+                    </div>
+                    <div class="mb-4">
+                        <h3 class="text-xl font-bold text-white">Pro</h3>
+                        <p class="text-slate-400 text-sm mt-1">Para criadores sérios</p>
+                    </div>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold price-tag" id="proPrice">R$97</span>
+                        <span class="text-slate-400">/mês</span>
+                        <div class="text-xs text-slate-500 mt-1" id="proBilling">Cobrado mensalmente</div>
+                    </div>
+                    <ul class="space-y-3 mb-6 text-sm">
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Canais ilimitados
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Todos os filtros avançados
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Todos os nichos globais
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Exportação CSV/Excel
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Alertas de novos canais
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-medium transition shadow-lg shadow-indigo-500/30">
+                        Assinar Agora
+                    </button>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="pricing-card rounded-2xl p-6 border border-slate-700 card-hover">
+                    <div class="mb-4">
+                        <h3 class="text-xl font-bold text-white">Agência</h3>
+                        <p class="text-slate-400 text-sm mt-1">Para equipes e agências</p>
+                    </div>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold price-tag" id="agencyPrice">R$297</span>
+                        <span class="text-slate-400">/mês</span>
+                        <div class="text-xs text-slate-500 mt-1" id="agencyBilling">Cobrado mensalmente</div>
+                    </div>
+                    <ul class="space-y-3 mb-6 text-sm">
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Tudo do Pro +
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            5 usuários
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            API de acesso
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Relatórios white-label
+                        </li>
+                        <li class="flex items-center gap-2 text-slate-300">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            Suporte prioritário
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 rounded-lg border border-slate-600 text-white hover:bg-slate-800 transition font-medium">
+                        Falar com Vendas
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 mt-20 bg-slate-900/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <span class="text-xl font-bold text-white">TubeHunter</span>
+                    </div>
+                    <p class="text-slate-400 text-sm">Inteligência competitiva para criadores de conteúdo que querem crescer no YouTube.</p>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Produto</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-white transition">Dashboard</a></li>
+                        <li><a href="#" class="hover:text-white transition">Formatos Fáceis</a></li>
+                        <li><a href="#" class="hover:text-white transition">Tendências Globais</a></li>
+                        <li><a href="#" class="hover:text-white transition">API</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Recursos</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li><a href="#" class="hover:text-white transition">Blog</a></li>
+                        <li><a href="#" class="hover:text-white transition">Guias</a></li>
+                        <li><a href="#" class="hover:text-white transition">Casos de Sucesso</a></li>
+                        <li><a href="#" class="hover:text-white transition">Ajuda</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Contato</h4>
+                    <ul class="space-y-2 text-sm text-slate-400">
+                        <li>suporte@tubehunter.pro</li>
+                        <li>São Paulo, Brasil</li>
+                        <li class="flex gap-4 mt-4">
+                            <a href="#" class="text-slate-400 hover:text-white transition">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
+                            </a>
+                            <a href="#" class="text-slate-400 hover:text-white transition">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-slate-800 mt-8 pt-8 text-center text-slate-500 text-sm">
+                © 2024 TubeHunter Pro. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center">
+        <div class="bg-slate-800 rounded-2xl p-8 max-w-md w-full mx-4 border border-slate-700 modal-enter">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white">Acessar Conta</h3>
+                <button onclick="closeLoginModal()" class="text-slate-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Email</label>
+                    <input type="email" required class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="seu@email.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Senha</label>
+                    <input type="password" required class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition">
+                    Entrar
+                </button>
+            </form>
+            <p class="mt-4 text-center text-sm text-slate-400">
+                Não tem conta? <a href="#" class="text-indigo-400 hover:text-indigo-300">Criar conta grátis</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Dados Mock realistas baseados em métricas reais de crescimento
+        const channelsData = [
+            {
+                id: 1,
+                name: "Tech Reviews BR",
+                handle: "@techreviewsbr",
+                avatar: "Tech",
+                country: "BR",
+                flag: "🇧🇷",
+                niche: "tech",
+                subniche: "smartphones",
+                createdDays: 15,
+                views: 450000,
+                subs: 12500,
+                growth: "+340%",
+                recentVideo: "iPhone 15 vs Galaxy S24",
+                viewsVideo: "125K views • 2 dias",
+                color: "blue"
+            },
+            {
+                id: 2,
+                name: "Finanças Simples",
+                handle: "@financassimples",
+                avatar: "Fin",
+                country: "BR",
+                flag: "🇧🇷",
+                niche: "finance",
+                subniche: "investimentos",
+                createdDays: 22,
+                views: 890000,
+                subs: 34000,
+                growth: "+520%",
+                recentVideo: "Como investir R$100",
+                viewsVideo: "280K views • 1 dia",
+                color: "emerald"
+            },
+            {
+                id: 3,
+                name: "Gamer Rush",
+                handle: "@gamerrush",
+                avatar: "Game",
+                country: "US",
+                flag: "🇺🇸",
+                niche: "gaming",
+                subniche: "mobile",
+                createdDays: 8,
+                views: 1200000,
+                subs: 67000,
+                growth: "+780%",
+                recentVideo: "Free Fire Secret Tips",
+                viewsVideo: "450K views • 12 horas",
+                color: "purple"
+            },
+            {
+                id: 4,
+                name: "Cozinha Rápida",
+                handle: "@cozinharapida",
+                avatar: "Cook",
+                country: "BR",
+                flag: "🇧🇷",
+                niche: "health",
+                subniche: "receitas",
+                createdDays: 30,
+                views: 320000,
+                subs: 8900,
+                growth: "+210%",
+                recentVideo: "Jantar em 15 minutos",
+                viewsVideo: "89K views • 3 dias",
+                color: "orange"
+            },
+            {
+                id: 5,
+                name: "Marketing Digital Pro",
+                handle: "@marketingpro",
+                avatar: "Mkt",
+                country: "BR",
+                flag: "🇧🇷",
+                niche: "business",
+                subniche: "marketing",
+                createdDays: 45,
+                views: 150000,
+                subs: 5600,
+                growth: "+180%",
+                recentVideo: "SEO para YouTube 2024",
+                viewsVideo: "45K views • 5 dias",
+                color: "indigo"
+            },
+            {
+                id: 6,
+                name: "React Daily US",
+                handle: "@reactdailyus",
+                avatar: "React",
+                country: "US",
+                flag: "🇺🇸",
+                niche: "entertainment",
+                subniche: "react",
+                createdDays: 12,
+                views: 2800000,
+                subs: 156000,
+                growth: "+920%",
+                recentVideo: "Reacting to viral TikToks",
+                viewsVideo: "890K views • 1 dia",
+                color: "red"
+            }
+        ];
+
+        const easyFormatsData = [
+            {
+                id: 1,
+                name: "Daily Reacts US",
+                handle: "@dailyreactsus",
+                avatar: "React",
+                country: "US",
+                flag: "🇺🇸",
+                difficulty: "easy",
+                views: "2.8M",
+                description: "Reage a vídeos virais do TikTok com comentários engraçados",
+                equipment: "Celular + Tripé",
+                editing: "CapCut (grátis)",
+                tip: "Grave em ambiente com boa iluminação natural",
+                color: "emerald"
+            },
+            {
+                id: 2,
+                name: "Resumo de Novelas",
+                handle: "@resumonovelas",
+                avatar: "TV",
+                country: "BR",
+                flag: "🇧🇷",
+                difficulty: "easy",
+                views: "1.2M",
+                description: "Resume episódios de novelas em 3 minutos",
+                equipment: "Celular + Microfone de lapela",
+                editing: "VN Editor (grátis)",
+                tip: "Poste imediatamente após o episódio ao vivo",
+                color: "emerald"
+            },
+            {
+                id: 3,
+                name: "Tech Unboxing BR",
+                handle: "@techunboxing",
+                avatar: "Tech",
+                country: "BR",
+                flag: "🇧🇷",
+                difficulty: "medium",
+                views: "890K",
+                description: "Unboxing de produtos tech com reviews honestos",
+                equipment: "Celular + Ring light",
+                editing: "CapCut Pro",
+                tip: "Foque em produtos que acabaram de lançar",
+                color: "amber"
+            },
+            {
+                id: 4,
+                name: "Fitness Casa",
+                handle: "@fitnesscasa",
+                avatar: "Fit",
+                country: "BR",
+                flag: "🇧🇷",
+                difficulty: "easy",
+                views: "650K",
+                description: "Rotinas de exercícios sem equipamento",
+                equipment: "Celular + Tripé flexível",
+                editing: "InShot (grátis)",
+                tip: "Mostre resultados reais em 30 dias",
+                color: "emerald"
+            },
+            {
+                id: 5,
+                name: "Cortes Podcast",
+                handle: "@cortespodcast",
+                avatar: "Pod",
+                country: "BR",
+                flag: "🇧🇷",
+                difficulty: "medium",
+                views: "3.2M",
+                description: "Corta momentos virais de podcasts longos",
+                equipment: "Computador básico",
+                editing: "DaVinci Resolve",
+                tip: "Foque em momentos polêmicos ou engraçados",
+                color: "amber"
+            },
+            {
+                id: 6,
+                name: "Receitas 5min",
+                handle: "@receitas5min",
+                avatar: "Food",
+                country: "BR",
+                flag: "🇧🇷",
+                difficulty: "easy",
+                views: "1.8M",
+                description: "Receitas rápidas com ingredientes simples",
+                equipment: "Celular + Suporte de cozinha",
+                editing: "CapCut (grátis)",
+                tip: "Use textos grandes e música trending",
+                color: "emerald"
+            }
+        ];
+
+        const subniches = {
+            all: ["Todos"],
+            tech: ["Todos", "Smartphones", "Computadores", "Gadgets", "Software"],
+            finance: ["Todos", "Investimentos", "Day Trade", "Economia", "Cripto"],
+            health: ["Todos", "Fitness", "Nutrição", "Receitas", "Bem-estar"],
+            gaming: ["Todos", "Mobile", "PC", "Console", "Esports"],
+            education: ["Todos", "Idiomas", "Programação", "Concursos", "Habilidades"],
+            business: ["Todos", "Marketing", "Vendas", "Startups", "Gestão"],
+            entertainment: ["Todos", "React", "Vlogs", "Comédia", "Música"]
+        };
+
+        let currentView = 'grid';
+        let isAnnual = false;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChannels(channelsData);
+            renderEasyFormats(easyFormatsData);
+            updateResultsCount(channelsData.length);
+        });
+
+        // Funções de renderização
+        function renderChannels(channels) {
+            const container = document.getElementById('channelsContainer');
+            container.innerHTML = '';
+            
+            channels.forEach((channel, index) => {
+                const card = createChannelCard(channel, index);
+                container.appendChild(card);
+            });
+        }
+
+        function createChannelCard(channel, index) {
+            const div = document.createElement('div');
+            div.className = `bg-slate-800/50 rounded-2xl p-6 border border-slate-700 card-hover slide-in`;
+            div.style.animationDelay = `${index * 0.1}s`;
+            
+            div.innerHTML = `
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-${channel.color}-500 to-${channel.color}-700 flex items-center justify-center text-white font-bold text-lg">
+                                ${channel.avatar}
+                            </div>
+                            <span class="absolute -bottom-1 -right-1 text-lg">${channel.flag}</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-lg">${channel.name}</h3>
+                            <div class="text-xs text-slate-400">${channel.handle} • ${channel.createdDays} dias</div>
+                        </div>
+                    </div>
+                    <span class="bg-${channel.color}-500/20 text-${channel.color}-400 px-2 py-1 rounded text-xs font-bold">${channel.growth}</span>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="bg-slate-900/50 rounded-lg p-3">
+                        <div class="text-xs text-slate-400">Visualizações</div>
+                        <div class="text-white font-bold">${formatNumber(channel.views)}</div>
+                    </div>
+                    <div class="bg-slate-900/50 rounded-lg p-3">
+                        <div class="text-xs text-slate-400">Inscritos</div>
+                        <div class="text-white font-bold">${formatNumber(channel.subs)}</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/50 rounded-lg p-3 mb-4 border border-slate-700">
+                    <div class="text-xs text-slate-400 mb-1">Vídeo recente</div>
+                    <div class="text-white text-sm font-medium truncate">${channel.recentVideo}</div>
+                    <div class="text-xs text-slate-500 mt-1">${channel.viewsVideo}</div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button onclick="analyzeChannel(${channel.id})" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-sm font-medium transition">
+                        Analisar
+                    </button>
+                    <button onclick="saveChannel(${channel.id})" class="px-3 py-2 border border-slate-600 rounded-lg hover:bg-slate-700 transition">
+                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            return div;
+        }
+
+        function renderEasyFormats(formats) {
+            const container = document.getElementById('easyChannels');
+            container.innerHTML = '';
+            
+            formats.forEach((format, index) => {
+                const card = createEasyFormatCard(format, index);
+                container.appendChild(card);
+            });
+        }
+
+        function createEasyFormatCard(format, index) {
+            const div = document.createElement('div');
+            div.className = `difficulty-card bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 border-2 border-${format.color}-500/50 relative overflow-hidden group hover:border-${format.color}-500 transition-all`;
+            div.setAttribute('data-difficulty', format.difficulty);
+            div.style.animationDelay = `${index * 0.1}s`;
+            
+            const badgeColor = format.difficulty === 'easy' ? 'emerald' : 'amber';
+            const badgeText = format.difficulty === 'easy' ? 'SÓ CELULAR' : 'EQUIPAMENTO BÁSICO';
+            
+            div.innerHTML = `
+                <div class="absolute top-4 left-4 bg-${badgeColor}-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    ${badgeText}
+                </div>
+                <div class="flex items-center justify-between mb-4 mt-8">
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-${format.color}-500 to-${format.color}-700 flex items-center justify-center text-white font-bold text-lg border-2 border-${format.color}-500">
+                                ${format.avatar}
+                            </div>
+                            <span class="absolute -bottom-1 -right-1 w-6 h-6 bg-slate-800 rounded-full flex items-center justify-center text-xs border-2 border-slate-800">${format.flag}</span>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white text-lg">${format.name}</h3>
+                            <div class="text-xs text-slate-400">${format.handle} • <span class="text-${format.color}-400">${format.country}</span></div>
+                        </div>
+                    </div>
+                    <span class="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs font-bold">${format.views} views</span>
+                </div>
+                <div class="space-y-3 mb-4">
+                    <div class="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+                        <div class="text-xs text-slate-400 mb-1">O que faz</div>
+                        <div class="text-white font-medium text-sm">${format.description}</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-${format.color}-500/10 rounded-lg p-2 border border-${format.color}-500/20">
+                            <div class="text-xs text-${format.color}-400">Equipamento</div>
+                            <div class="text-white text-sm font-medium">${format.equipment}</div>
+                        </div>
+                        <div class="bg-${format.color}-500/10 rounded-lg p-2 border border-${format.color}-500/20">
+                            <div class="text-xs text-${format.color}-400">Edição</div>
+                            <div class="text-white text-sm font-medium">${format.editing}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-${format.color}-500/10 rounded-lg p-3 border border-${format.color}-500/20">
+                    <div class="flex items-start gap-2">
+                        <svg class="w-5 h-5 text-${format.color}-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <div class="text-xs text-${format.color}-400 font-semibold">Dica Pro</div>
+                            <div class="text-slate-300 text-sm">${format.tip}</div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="replicateFormat(${format.id})" class="w-full mt-4 bg-${format.color}-600 hover:bg-${format.color}-700 text-white py-2 rounded-lg font-medium transition flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+                    </svg>
+                    Replicar Este Formato
+                </button>
+            `;
+            
+            return div;
+        }
+
+        // Funções de utilidade
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+
+        function updateSubniches() {
+            const niche = document.getElementById('nicheFilter').value;
+            const subnicheSelect = document.getElementById('subnicheFilter');
+            subnicheSelect.innerHTML = '';
+            
+            subniches[niche].forEach(sub => {
+                const option = document.createElement('option');
+                option.value = sub.toLowerCase();
+                option.textContent = sub;
+                subnicheSelect.appendChild(option);
+            });
+        }
+
+        function applyFilters() {
+            const dateFilter = parseInt(document.getElementById('dateFilter').value);
+            const viewsFilter = parseInt(document.getElementById('viewsFilter').value);
+            const nicheFilter = document.getElementById('nicheFilter').value;
+            const subnicheFilter = document.getElementById('subnicheFilter').value;
+            
+            // Simular loading
+            const container = document.getElementById('channelsContainer');
+            container.innerHTML = '<div class="col-span-full text-center py-12"><div class="loading-skeleton w-12 h-12 rounded-full mx-auto mb-4"></div><p class="text-slate-400">Buscando canais...</p></div>';
+            
+            setTimeout(() => {
+                const filtered = channelsData.filter(channel => {
+                    const dateMatch = channel.createdDays <= dateFilter;
+                    const viewsMatch = channel.views >= viewsFilter;
+                    const nicheMatch = nicheFilter === 'all' || channel.niche === nicheFilter;
+                    const subnicheMatch = subnicheFilter === 'all' || subnicheFilter === 'todos' || channel.subniche === subnicheFilter;
+                    
+                    return dateMatch && viewsMatch && nicheMatch && subnicheMatch;
+                });
+                
+                renderChannels(filtered);
+                updateResultsCount(filtered.length);
+            }, 800);
+        }
+
+        function resetFilters() {
+            document.getElementById('dateFilter').value = '30';
+            document.getElementById('viewsFilter').value = '100000';
+            document.getElementById('nicheFilter').value = 'all';
+            updateSubniches();
+            applyFilters();
+        }
+
+        function updateResultsCount(count) {
+            document.getElementById('resultsCount').textContent = count;
+        }
+
+        function toggleView(view) {
+            currentView = view;
+            const gridBtn = document.getElementById('gridBtn');
+            const listBtn = document.getElementById('listBtn');
+            const container = document.getElementById('channelsContainer');
+            
+            if (view === 'grid') {
+                gridBtn.classList.add('text-indigo-400', 'border-indigo-500');
+                gridBtn.classList.remove('text-slate-400', 'border-slate-700');
+                listBtn.classList.remove('text-indigo-400', 'border-indigo-500');
+                listBtn.classList.add('text-slate-400', 'border-slate-700');
+                container.classList.remove('grid-cols-1');
+                container.classList.add('md:grid-cols-2', 'lg:grid-cols-3');
+            } else {
+                listBtn.classList.add('text-indigo-400', 'border-indigo-500');
+                listBtn.classList.remove('text-slate-400', 'border-slate-700');
+                gridBtn.classList.remove('text-indigo-400', 'border-indigo-500');
+                gridBtn.classList.add('text-slate-400
                 <div class="flex gap-2 items-end">
                     <button onclick="applyFilters()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition shadow-lg shadow-indigo-500/25 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
